@@ -1,0 +1,88 @@
+#!/usr/bin/env ruby
+# encoding: UTF-8
+
+require 'fileutils'
+require 'optparse'
+
+def parse
+  options = {}
+  parser = OptionParser.new do |opts|
+    opts.banner = "Usage: couchproxy [options] start|stop|config"
+
+    options[:config] = default_config
+    opts.on('-C', '--config FILE',
+              "Specify couchproxy.yml file (default: #{default_config})") do |config|
+      options[:config] = config
+    end
+
+    options[:host] = '0.0.0.0'
+    opts.on('-a', '--address HOST',
+              'Bind to HOST address (default: 0.0.0.0)') do |host|
+      options[:host] = host
+    end
+
+    options[:port] = 6984
+    opts.on('-p', '--port PORT', 'Use PORT (default: 6984)') do |port|
+      options[:port] = port
+    end
+
+    options[:log] = 'couchproxy.log'
+    opts.on('-l', '--log FILE',
+              'File to redirect output (default: couchproxy.log)') do |log|
+      options[:log] = log
+    end
+
+    options[:pid] = 'couchproxy.pid'
+    opts.on('-P', '--pid FILE',
+              'File to store PID (default: couchproxy.pid)') do |pid|
+      options[:pid] = pid
+    end
+  end
+
+  begin
+    parser.parse!
+  rescue
+    puts parser
+    exit(1)
+  end
+
+  options.tap do |opts|
+    if ARGV.size != 1 || !%w[start stop config].include?(ARGV.first)
+      puts parser
+      exit(1)
+    end
+    opts[:cmd] = ARGV.first
+  end
+end
+
+def default_config
+  File.join(Dir.pwd, 'couchproxy.yml')
+end
+
+def start(opts)
+  ENV['COUCH_PROXY_CONFIG'] = opts[:config]
+  flags = {
+    '-a' => opts[:host],
+    '-p' => opts[:port],
+    '-l' => opts[:log],
+    '-P' => opts[:pid],
+    '-R' => File.expand_path('../../lib/couchproxy.ru', __FILE__),
+    '--tag' => 'couchproxy'
+  }
+  system("thin -d #{flags.map {|k, v| "#{k} #{v}" }.join(' ')} start")
+end
+
+def stop(opts)
+  system("thin -P #{opts[:pid]} stop")
+end
+
+def config(opts)
+  template = File.expand_path('../../conf/couchproxy.yml', __FILE__)
+  FileUtils.copy(template, default_config)
+  puts "Copied template cluster file to #{default_config}."
+  puts "Update the file and start the server."
+end
+
+opts = parse
+method(opts[:cmd]).call(opts)
+

@@ -1,0 +1,36 @@
+== Welcome to CouchProxy
+
+CouchProxy is a simple proxy server that distributes reads and writes to a
+cluster of Apache CouchDB servers so they appear to be a single huge database.
+Documents are stored and retrieved from a particular CouchDB instance, using
+consistent hashing of the document id. Map/reduce views are processed
+concurrently on each CouchDB instance and merged together by the proxy before
+returning the results to the client.
+
+CouchProxy uses the Thin web server and EventMachine for asynchronous IO. There
+are no blocking IO calls in the server, which allows it to handle many clients
+and many backend CouchDB nodes concurrently, using very little processor and
+memory.
+
+== Usage
+
+1. gem install couchproxy
+2. couchproxy config
+3. Configure CouchDB nodes in couchproxy.yml
+4. couchproxy start
+
+== Dependencies
+
+* em-http-request >= 0.2.11
+* json >= 1.4.6
+* json-stream >= 0.1.0
+* thin >= 1.2.7
+* ruby >= 1.9.1
+
+== Contact
+
+Project contact: David Graham <david.malcom.graham@gmail.com>
+
+== License
+
+CouchProxy is released under the MIT license.  Check the LICENSE file for details.

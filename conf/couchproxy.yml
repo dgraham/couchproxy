@@ -1,0 +1,21 @@
+# This is the couchproxy configuration file. Restart the couchproxy process
+# after changing this file for the changes to take effect.
+#
+# Parameters:
+# couchjs:  The fully qualified path to the couchjs view server.
+# reducers: The number of couchjs processes to run. We typically want one
+#           view server process per core for best rereduce performance.
+# nodes:    A list of CouchDB servers with the partitions that they host. Once
+#           we start using the proxy with these partitions, we can't change the
+#           total number of partitions without carefully repartitioning the database.
+#           We can move partitions to new servers easily though. The number of
+#           partitions should match the maximum number of servers we think we'll
+#           need for our data set.
+
+couchjs: /usr/bin/couchjs
+reducers: 4
+nodes:
+  - host: 'http://localhost:5984'
+    partitions: !ruby/range 0...32
+  - host: 'http://localhost:5984'
+    partitions: !ruby/range 32...64
