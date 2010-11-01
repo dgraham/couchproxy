@@ -4,6 +4,7 @@ $:.unshift File.dirname(__FILE__) unless
   $:.include?(File.dirname(__FILE__))
 
 %w[
+  digest
   em-http
   json
   json/stream
@@ -18,9 +19,14 @@ $:.unshift File.dirname(__FILE__) unless
   couchproxy/node
   couchproxy/partition
   couchproxy/deferrable_body
-  couchproxy/reducer
   couchproxy/request
   couchproxy/router
+  couchproxy/row_filter
+
+  couchproxy/reducer
+  couchproxy/reduce/base_reducer
+  couchproxy/reduce/map_reducer
+  couchproxy/reduce/reduce_reducer
 
   couchproxy/rack/base
   couchproxy/rack/all_databases
@@ -44,5 +50,5 @@ $:.unshift File.dirname(__FILE__) unless
 ].each {|f| require f }
 
 module CouchProxy
-  VERSION = '0.1.0'
+  VERSION = '0.2.0'
 end

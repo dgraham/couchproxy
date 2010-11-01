@@ -23,7 +23,7 @@ module CouchProxy
   end
 
   class ReduceProcess < EventMachine::Connection
-    def initialize(unbind)
+    def initialize(unbind=nil)
       @unbind, @connected, @callbacks, @deferred = unbind, false, [], []
     end
 
@@ -51,7 +51,7 @@ module CouchProxy
 
     def unbind
       @connected = false
-      @unbind.call
+      @unbind.call if @unbind
     end
   end
 end
