@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module CouchProxy
   module Rack
     class Base
@@ -19,7 +21,7 @@ module CouchProxy
       end
 
       def proxy_to(node, &finish)
-        head_proxy_to(node, finish) if @request.request_method == 'HEAD'
+        head_proxy_to(node, &finish) if @request.request_method == 'HEAD'
 
         body, started = DeferrableBody.new, false
         uri = "#{node.uri}#{@request.fullpath}"
@@ -59,7 +61,7 @@ module CouchProxy
       end
 
       def proxy_to_any_partition
-        partition = cluster.any_partition
+        partition = @cluster.any_partition
         request.rewrite_proxy_url!(partition.num)
         proxy_to(partition.node)
       end
@@ -67,7 +69,7 @@ module CouchProxy
       def proxy_to_all_nodes(&callback)
         method = request.request_method.downcase
         multi = EM::MultiRequest.new
-        cluster.nodes.each do |n|
+        @cluster.nodes.each do |n|
           uri = "#{n.uri}#{@request.fullpath}"
           req = EM::HttpRequest.new(uri).send(method,
             :head => proxy_headers, :body => @request.content)
@@ -79,7 +81,7 @@ module CouchProxy
       def proxy_to_all_partitions(&callback)
         method = request.request_method.downcase
         multi = EM::MultiRequest.new
-        cluster.partitions.each do |p|
+        @cluster.partitions.each do |p|
           uri = "#{p.node.uri}#{@request.rewrite_proxy_url(p.num)}"
           uri << "?#{@request.query_string}" unless @request.query_string.empty?
           multi.add EM::HttpRequest.new(uri).send(method,
@@ -102,7 +104,7 @@ module CouchProxy
       end
 
       def uuids(count, &callback)
-        http = EM::HttpRequest.new("#{cluster.any_node.uri}/_uuids?count=#{count}").get
+        http = EM::HttpRequest.new("#{@cluster.any_node.uri}/_uuids?count=#{count}").get
         http.errback { callback.call(nil) }
         http.callback do |res|
           if res.response_header.status == 200

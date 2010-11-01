@@ -1,4 +1,7 @@
+# encoding: UTF-8
+
 module CouchProxy
+
   # Implements the JSON sorting rules defined at
   # http://wiki.apache.org/couchdb/View_collation.
   class Collator

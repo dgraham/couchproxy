@@ -1,4 +1,7 @@
+# encoding: UTF-8
+
 module Rack
+
   # Add a few helper methods to Rack's Request class.
   class Request
     def json?
