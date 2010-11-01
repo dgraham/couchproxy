@@ -21,7 +21,7 @@ memory.
 
 == Dependencies
 
-* em-http-request >= 0.2.11
+* em-http-request >= 0.2.14
 * json >= 1.4.6
 * json-stream >= 0.1.0
 * thin >= 1.2.7
