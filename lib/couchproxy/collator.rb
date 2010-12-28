@@ -5,7 +5,6 @@ module CouchProxy
   # Implements the JSON sorting rules defined at
   # http://wiki.apache.org/couchdb/View_collation.
   class Collator
-    CLASSES = [NilClass, FalseClass, TrueClass, Numeric, String, Array, Hash]
 
     def initialize(reverse=false)
       @reverse = reverse
@@ -30,9 +29,22 @@ module CouchProxy
     private
 
     def compare_class(a, b)
-      aix = CLASSES.find_index {|c| a.is_a?(c) }
-      bix = CLASSES.find_index {|c| b.is_a?(c) }
+      # optimize common case
+      return 0 if a.class == b.class
+      aix, bix = class_index(a), class_index(b)
       aix == bix ? 0 : aix < bix ? -1 : 1
+    end
+
+    def class_index(value)
+      case value
+        when NilClass   then 0
+        when FalseClass then 1
+        when TrueClass  then 2
+        when Numeric    then 3
+        when String     then 4
+        when Array      then 5
+        when Hash       then 6
+      end
     end
 
     # FIXME Implement UCA sorting with ICU
