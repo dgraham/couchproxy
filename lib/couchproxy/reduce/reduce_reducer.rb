@@ -5,6 +5,8 @@ module CouchProxy
 
     # Sorts and merges reduce query results from many different source streams.
     class ReduceReducer < BaseReducer
+      KEY       = 'key'.freeze
+      VALUE     = 'value'.freeze
       COUNT     = '_count'.freeze
       SUM       = '_sum'.freeze
       STATS     = '_stats'.freeze
@@ -25,7 +27,7 @@ module CouchProxy
       def initialize(args)
         super(args)
         @fn, @reducers, @processes = args[:fn], args[:reducers], []
-        @sorter = proc {|a, b| args[:collator].compare(a['key'], b['key']) }
+        @sorter = proc {|a, b| args[:collator].compare(a[KEY], b[KEY]) }
       end
 
       def complete?
@@ -50,18 +52,18 @@ module CouchProxy
 
       def next_group
         [].tap do |group|
-          key = @rows.first['key']
-          group << shift while @rows.any? && @rows.first['key'] == key
+          key = @rows.first[KEY]
+          group << shift while @rows.any? && @rows.first[KEY] == key
         end
       end
 
       def view_server(rows, callback)
         tracker = (@processes << {:value => NONE}).last
-        values = rows.map {|row| row['value'] }
+        values = rows.map {|row| row[VALUE] }
         @reducers.call.rereduce(@fn, values) do |result|
           success, value = result.flatten
           if success
-            tracker[:value] = {:key => rows.first['key'], :value => value}
+            tracker[:value] = {:key => rows.first[KEY], :value => value}
             ix = @processes.index {|t| t[:value] == NONE } || @processes.size
             finished = @processes.slice!(0, ix).map {|t| t[:value] }
             callback.call(finished)
@@ -72,18 +74,18 @@ module CouchProxy
       end
 
       def sum(rows)
-        value = rows.map {|row| row['value'] }.inject(:+)
-        {:key => rows.first['key'], :value => value}
+        value = rows.map {|row| row[VALUE] }.inject(:+)
+        {:key => rows.first[KEY], :value => value}
       end
 
       def stats(rows)
-        values = rows.map {|row| row['value'] }
+        values = rows.map {|row| row[VALUE] }
         min, max = values.map {|v| [v['min'], v['max']] }.flatten.minmax
         sum, count, sumsqr = %w[sum count sumsqr].map do |k|
           values.map {|v| v[k] }.inject(:+)
         end
         value = {:sum => sum, :count => count, :min => min, :max => max, :sumsqr => sumsqr}
-        {:key => rows.first['key'], :value => value}
+        {:key => rows.first[KEY], :value => value}
       end
 
       def built_in?

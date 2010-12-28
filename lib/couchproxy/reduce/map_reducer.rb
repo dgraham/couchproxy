@@ -5,6 +5,8 @@ module CouchProxy
 
     # Sorts and merges map query results from many different source streams.
     class MapReducer < BaseReducer
+      KEY = 'key'.freeze
+      ID  = 'id'.freeze
 
       # Args should contain the following keys:
       #  sources: List of stream sources used to identify from where
@@ -17,8 +19,8 @@ module CouchProxy
       def initialize(args)
         super(args)
         @sorter = proc do |a, b|
-          key = args[:collator].compare(a['key'], b['key'])
-          (key == 0) ? args[:collator].compare(a['id'], b['id']) : key
+          key = args[:collator].compare(a[KEY], b[KEY])
+          (key == 0) ? args[:collator].compare(a[ID], b[ID]) : key
         end
       end
     end
