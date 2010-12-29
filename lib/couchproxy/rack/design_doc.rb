@@ -78,7 +78,7 @@ module CouchProxy
           params[:limit] = request['limit'] || ''
           params[:limit] = params[:limit].empty? ? nil : params[:limit].to_i
           params[:skip] = (params[:limit] == 0) ? 0 : delete_query_param('skip').to_i
-          delete_query_param('limit') if params[:skip] > (params[:limit] || 0)
+          delete_query_param('limit') if params[:skip] > 0
           params[:collator] = CouchProxy::Collator.new(params[:descending])
         end
       end
@@ -112,7 +112,7 @@ module CouchProxy
         end
         spray(reducer) do |total_rows|
           offset = [params[:skip], total_rows].min
-          '],"total_rows":%s,"offset":%s}' % [total_rows, offset]
+          "\n],\"total_rows\":%s,\"offset\":%s}" % [total_rows, offset]
         end
       end
 
@@ -122,7 +122,7 @@ module CouchProxy
             :reducers => cluster.method(:reducer)})
           CouchProxy::Reduce::ReduceReducer.new(args)
         end
-        spray(reducer) {|total_rows| ']}' }
+        spray(reducer) {|total_rows| "\n]}" }
       end
 
       def spray(reducer, &finish)
@@ -132,7 +132,7 @@ module CouchProxy
           uri = "#{p.node.uri}#{request.rewrite_proxy_url(p.num)}"
           uri << "?#{request.query_string}" unless request.query_string.empty?
           EM::HttpRequest.new(uri).send(request.request_method.downcase,
-            :head => proxy_headers, :body => request.content)
+            :head => proxy_headers, :body => request.content, :timeout => 300)
         end
 
         started = false
@@ -143,7 +143,7 @@ module CouchProxy
             h['ETag'] = etag(etags)
           end
           send_response(200, headers, body)
-          send_chunk(body, '{"rows":[')
+          send_chunk(body, "{\"rows\":[\n")
         end
 
         closed = false
@@ -160,8 +160,8 @@ module CouchProxy
         reducer.error(&close)
         reducer.results do |results|
           start.call unless started
-          json = results.map {|row| row.to_json }.join(',')
-          json << ',' unless reducer.complete?
+          json = results.map {|row| row.to_json }.join(",\n")
+          json << ",\n" unless reducer.complete?
           send_chunk(body, json)
         end
         reducer.complete do
