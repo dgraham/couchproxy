@@ -53,11 +53,13 @@ module CouchProxy
         end
         @sources[source] += rows.size
         @sources.delete(source) if complete
+        source.pause unless complete
         process do |results|
           if results
             results = limit(skip(results))
             notify_results(results) if results.any?
             notify_complete if complete?
+            resume_streams unless complete?
           else
             notify_error
           end
@@ -71,6 +73,12 @@ module CouchProxy
       end
 
       private
+
+      def resume_streams
+        paused = @sources.select {|k, v| k.paused? }.keys
+        empty  = @sources.select {|k, v| k.paused? && v == 0 }.keys
+        (empty.any? ? empty : paused).each {|source| source.resume }
+      end
 
       def skip(sorted)
         if @skip > @skipped_rows
