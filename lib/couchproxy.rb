@@ -8,6 +8,7 @@ $:.unshift File.dirname(__FILE__) unless
   em-http
   json
   json/stream
+  rbtree
   thin
   time
   uri

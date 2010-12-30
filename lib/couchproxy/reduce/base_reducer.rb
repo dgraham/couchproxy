@@ -9,6 +9,8 @@ module CouchProxy
     # databases. Subclasses must provide a @sorter member variable, used to
     # sort streaming rows before they're processed.
     class BaseReducer
+      KEY = 'key'.freeze
+      ID  = 'id'.freeze
 
       # Args should contain the following keys:
       #  sources: List of stream sources used to identify from where
@@ -22,8 +24,8 @@ module CouchProxy
         @sources = Hash[@sources.map {|s| [s, 0] }]
         @listeners = Hash.new {|h, k| h[k] = [] }
         @skip ||= 0
-        @results, @rows = [], []
-        @returned, @skipped_rows = 0, 0
+        @results, @returned, @skipped_rows = [], 0, 0
+        @rows = MultiRBTree.new.tap {|t| t.readjust(@sorter) }
       end
 
       %w[results complete error].each do |name|
@@ -39,12 +41,16 @@ module CouchProxy
         private "notify_#{name}"
       end
 
-      # Gives the reducer more rows to process with their source id. Complete
-      # must be a boolean, signaling whether this stream of rows has finished.
+      # Gives the reducer more rows to process with their source connection.
+      # Complete must be a boolean, signaling whether this stream of rows has
+      # finished.
       def reduce(rows, source, complete)
         return if complete?
-        rows.each {|row| row[:proxy_source] = source }
-        @rows += rows
+        rows.each do |row|
+          row[:proxy_source] = source
+          key = [row[KEY], row[ID]]
+          @rows[key] = row
+        end
         @sources[source] += rows.size
         @sources.delete(source) if complete
         process do |results|
@@ -86,7 +92,6 @@ module CouchProxy
       end
 
       def process(&callback)
-        @rows.sort!(&@sorter)
         sorted = [].tap do |rows|
           rows << shift while @rows.any? && process?
         end
@@ -94,10 +99,10 @@ module CouchProxy
       end
 
       def shift
-        @rows.shift.tap do |row|
+        @rows.shift.tap do |key, row|
           source = row.delete(:proxy_source)
           @sources[source] -= 1 if @sources.key?(source)
-        end
+        end[1]
       end
 
       def process?

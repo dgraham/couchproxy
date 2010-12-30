@@ -25,9 +25,11 @@ module CouchProxy
       # reducers: A block that, when called, returns a CouchProxy::Reducer
       #           instance.
       def initialize(args)
+        @fn, @reducers, collator = args.values_at(:fn, :reducers, :collator)
+        # key = 0, id = 1
+        @sorter = proc {|a, b| collator.compare(a[0], b[0]) }
+        @processes = []
         super(args)
-        @fn, @reducers, @processes = args[:fn], args[:reducers], []
-        @sorter = proc {|a, b| args[:collator].compare(a[KEY], b[KEY]) }
       end
 
       def complete?
@@ -37,7 +39,6 @@ module CouchProxy
       private
 
       def process(&callback)
-        @rows.sort!(&@sorter)
         sorted = [].tap do |rows|
           while @rows.any? && process?
             case @fn
@@ -51,10 +52,8 @@ module CouchProxy
       end
 
       def next_group
-        [].tap do |group|
-          key = @rows.first[KEY]
-          group << shift while @rows.any? && @rows.first[KEY] == key
-        end
+        key, row = @rows.first
+        @rows.bound(key, key).map { shift }
       end
 
       def view_server(rows, callback)

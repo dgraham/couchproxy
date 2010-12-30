@@ -27,6 +27,7 @@ returning the results to the client."
   s.add_dependency('json', '~> 1.4')
   s.add_dependency('json-stream', '~> 0.1')
   s.add_dependency('thin', '~> 1.2')
+  s.add_dependency('rbtree', '~> 0.3')
   s.required_ruby_version = '>= 1.9.1'
 end
  
