@@ -24,7 +24,7 @@ module CouchProxy
         @sources = Hash[@sources.map {|s| [s, 0] }]
         @listeners = Hash.new {|h, k| h[k] = [] }
         @skip ||= 0
-        @results, @returned, @skipped_rows = [], 0, 0
+        @returned, @skipped_rows = 0, 0
         @rows = MultiRBTree.new.tap {|t| t.readjust(@sorter) }
       end
 
