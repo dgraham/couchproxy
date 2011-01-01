@@ -31,6 +31,10 @@ module CouchProxy
         end
       end
 
+      def head
+        # FIXME
+      end
+
       private
 
       def parse(body)

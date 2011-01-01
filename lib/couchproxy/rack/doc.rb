@@ -8,8 +8,9 @@ module CouchProxy
         request.rewrite_proxy_url!(partition.num)
         proxy_to(partition.node)
       end
-      alias :put :get
+      alias :put    :get
       alias :delete :get
+      alias :head   :get
     end
   end
 end
