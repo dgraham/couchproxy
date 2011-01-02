@@ -18,7 +18,7 @@ module CouchProxy
 
       def head
         case request.path_info
-          when QUERY then
+          when QUERY
             proxy_to_all_partitions do |responses|
               etags = responses.map {|r| r.response_header.etag }
               head = response_headers.tap do |h|
@@ -77,8 +77,9 @@ module CouchProxy
           params[:descending] = (request['descending'] == 'true')
           params[:limit] = request['limit'] || ''
           params[:limit] = params[:limit].empty? ? nil : params[:limit].to_i
-          params[:skip] = (params[:limit] == 0) ? 0 : delete_query_param('skip').to_i
-          delete_query_param('limit') if params[:skip] > 0
+          params[:skip] = delete_query_param('skip').to_i
+          params[:skip] = 0 if params[:limit] == 0
+          update_query_param('limit', params[:limit] + params[:skip]) if params[:limit]
           params[:collator] = CouchProxy::Collator.new(params[:descending])
         end
       end
@@ -129,8 +130,7 @@ module CouchProxy
         body, etags = DeferrableBody.new, []
 
         requests = cluster.partitions.map do |p|
-          uri = "#{p.node.uri}#{request.rewrite_proxy_url(p.num)}"
-          uri << "?#{request.query_string}" unless request.query_string.empty?
+          uri = "#{p.node.uri}#{request.rewrite_proxy_url(p.num)}#{query_string}"
           EM::HttpRequest.new(uri).send(request.request_method.downcase,
             :head => proxy_headers, :body => request.content, :timeout => 300)
         end

@@ -3,9 +3,12 @@
 module CouchProxy
   module Rack
     class Base
+      APPLICATION_JSON = "application/json".freeze
+      TEXT_PLAIN = "text/plain;charset=utf-8".freeze
       DESIGN_ID = /^_design\/.+/
       METHODS = [:get, :put, :post, :delete, :head].freeze
       INVALID_JSON = '{"error":"bad_request","reason":"invalid UTF-8 JSON"}'.freeze
+      SERVER_VERSION = "CouchProxy/#{CouchProxy::VERSION}".freeze
 
       attr_reader :request, :cluster
 
@@ -21,7 +24,7 @@ module CouchProxy
       end
 
       def proxy_to(node, &finish)
-        head_proxy_to(node, &finish) if @request.request_method == 'HEAD'
+        head_proxy_to(node, &finish) if @request.head?
 
         body, started = DeferrableBody.new, false
         uri = "#{node.uri}#{@request.fullpath}"
@@ -32,7 +35,7 @@ module CouchProxy
           unless started
             started = true
             head = normalize(res.response_header).tap do |h|
-              h['Server'] = "CouchProxy/#{CouchProxy::VERSION}"
+              h['Server'] = SERVER_VERSION
               if res.response_header.location
                 h['Location'] = rewrite_location(res.response_header.location)
               end
@@ -82,8 +85,7 @@ module CouchProxy
         method = request.request_method.downcase
         multi = EM::MultiRequest.new
         @cluster.partitions.each do |p|
-          uri = "#{p.node.uri}#{@request.rewrite_proxy_url(p.num)}"
-          uri << "?#{@request.query_string}" unless @request.query_string.empty?
+          uri = "#{p.node.uri}#{@request.rewrite_proxy_url(p.num)}#{query_string}"
           multi.add EM::HttpRequest.new(uri).send(method,
             :head => proxy_headers, :body => @request.content)
         end
@@ -149,7 +151,9 @@ module CouchProxy
         http = EM::HttpRequest.new(uri).head(:head => proxy_headers)
         http.callback do 
           status = http.response_header.status
-          headers = normalize(http.response_header)
+          headers = normalize(http.response_header).tap do |h|
+            h['Server'] = SERVER_VERSION
+          end
           send_response(status, headers, [])
           finish.call if finish
         end
@@ -174,11 +178,10 @@ module CouchProxy
       end
 
       def response_headers
-        type = @request.json? ? "application/json" : "text/plain;charset=utf-8"
         {
-          "Server" => "CouchProxy/#{CouchProxy::VERSION}",
+          "Server" => SERVER_VERSION,
           "Date" => Time.now.httpdate,
-          "Content-Type" => type,
+          "Content-Type" => @request.json? ? APPLICATION_JSON : TEXT_PLAIN,
           "Cache-Control" => "must-revalidate"
         }
       end
@@ -188,11 +191,18 @@ module CouchProxy
       end
 
       def delete_query_param(param)
-        value = @request.GET.delete(param)
-        if value
+        @request.GET.delete(param).tap do |value|
           @request.env['QUERY_STRING'] = ::Rack::Utils.build_query(@request.GET)
         end
-        value
+      end
+
+      def update_query_param(param, value)
+        @request[param] = value        
+        @request.env['QUERY_STRING'] = ::Rack::Utils.build_query(@request.GET)
+      end
+      
+      def query_string
+        @request.query_string.empty? ? '' : "?#{@request.query_string}"
       end
     end
   end

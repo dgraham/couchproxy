@@ -3,6 +3,10 @@
 $:.unshift File.dirname(__FILE__) unless
   $:.include?(File.dirname(__FILE__))
 
+module CouchProxy
+  VERSION = '0.2.0'
+end
+
 %w[
   digest
   em-http
@@ -49,7 +53,3 @@ $:.unshift File.dirname(__FILE__) unless
   couchproxy/rack/uuids
   couchproxy/rack/view_cleanup
 ].each {|f| require f }
-
-module CouchProxy
-  VERSION = '0.2.0'
-end
