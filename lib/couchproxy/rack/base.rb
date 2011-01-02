@@ -17,10 +17,10 @@ module CouchProxy
       end
 
       def method_missing(name)
-        allowed = methods.map {|m| m.to_sym } & METHODS
-        allowed = allowed.map {|m| m.to_s.upcase }.join(',')
+        allowed = (methods & METHODS).map {|m| m.to_s.upcase }.sort.join(',')
         body = "{\"error\:\"method_not_allowed\",\"reason\":\"Only #{allowed} allowed\"}"
-        send_response(405, response_headers, [body])
+        headers = response_headers.tap {|h| h['Allow'] = allowed }
+        send_response(405, headers, [body])
       end
 
       def proxy_to(node, &finish)
@@ -200,7 +200,7 @@ module CouchProxy
         @request[param] = value        
         @request.env['QUERY_STRING'] = ::Rack::Utils.build_query(@request.GET)
       end
-      
+
       def query_string
         @request.query_string.empty? ? '' : "?#{@request.query_string}"
       end
