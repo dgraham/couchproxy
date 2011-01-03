@@ -19,7 +19,7 @@ returning the results to the client."
   s.homepage = "http://github.com/dgraham/couchproxy"
   s.authors = ["David Graham"]
   s.files = FileList['[A-Z]*', '{bin,lib,conf}/**/*']
-  s.test_files = FileList["test/**/*test.rb"]
+  s.test_files = FileList["test/**/*"]
   s.executables = %w[couchproxy]
   s.require_path = "lib"
   s.has_rdoc = true
@@ -36,6 +36,7 @@ Rake::GemPackageTask.new(spec) do |pkg|
 end 
 
 Rake::TestTask.new(:test) do |test|
+  test.libs << 'test'
   test.pattern = 'test/**/*_test.rb'
   test.warning = true
 end
