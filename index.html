@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+
+  <title>dgraham/couchproxy @ GitHub</title>
+
+  <style type="text/css">
+    body {
+      margin-top: 1.0em;
+      background-color: #f8f8f8;
+      font-family: Helvetica, Arial, FreeSans, san-serif;
+      color: #000000;
+    }
+    #container {
+      margin: 0 auto;
+      width: 700px;
+    }
+    h1 { font-size: 3.8em; color: #070707; margin-bottom: 3px; }
+    h1 .small { font-size: 0.4em; }
+    h1 a { text-decoration: none }
+    h2 { font-size: 1.5em; color: #070707; }
+    h3 { text-align: center; color: #070707; }
+    a { color: #070707; }
+    .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+    .download { float: right; }
+    pre { background: #000; color: #fff; padding: 15px;}
+    hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
+    .footer { text-align:center; padding-top:30px; font-style: italic; }
+  </style>
+</head>
+
+<body>
+  <a href="http://github.com/dgraham/couchproxy"><img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
+
+  <div id="container">
+
+    <div class="download">
+      <a href="http://github.com/dgraham/couchproxy/zipball/master">
+        <img border="0" width="90" src="http://github.com/images/modules/download/zip.png"></a>
+      <a href="http://github.com/dgraham/couchproxy/tarball/master">
+        <img border="0" width="90" src="http://github.com/images/modules/download/tar.png"></a>
+    </div>
+
+    <h1><a href="http://github.com/dgraham/couchproxy">CouchProxy</a>
+      <span class="small">by <a href="http://github.com/dgraham">dgraham</a></span></h1>
+
+    <div class="description">
+      A proxy server for Apache CouchDB clusters.
+    </div>
+
+    <p>CouchProxy is a simple proxy server that distributes reads and writes to a
+cluster of Apache CouchDB servers so they appear to be a single huge database.
+Documents are stored and retrieved from a particular CouchDB instance, using
+consistent hashing of the document id. Map/reduce views are processed
+concurrently on each CouchDB instance and merged together by the proxy before
+returning the results to the client.
+
+CouchProxy uses the Thin web server and EventMachine for asynchronous IO. There
+are no blocking IO calls in the server, which allows it to handle many clients
+and many backend CouchDB nodes concurrently, using very little processor and
+memory.</p><h2>Dependencies</h2>
+<p>* em-http-request >= 0.3.0
+* json >= 1.5.1
+* json-stream >= 0.1.1
+* thin >= 1.2.11
+* rbtree >= 0.3.0
+* ruby >= 1.9.1</p>
+<h2>Install</h2>
+<p>$ gem install couchproxy
+$ couchproxy config
+$ vi couchproxy.yml # configure couchdb nodes
+$ couchproxy start</p>
+<h2>License</h2>
+<p>CouchProxy is released under the MIT license.</p>
+<h2>Authors</h2>
+<p>David Graham (david.malcom.graham@gmail.com)</p>
+
+
+    <h2>Download</h2>
+    <p>
+      You can download this project in either
+      <a href="http://github.com/dgraham/couchproxy/zipball/master">zip</a> or
+      <a href="http://github.com/dgraham/couchproxy/tarball/master">tar</a> formats.
+    </p>
+    <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
+      by running:
+      <pre>$ git clone git://github.com/dgraham/couchproxy</pre>
+    </p>
+
+    <div class="footer">
+      get the source code on GitHub : <a href="http://github.com/dgraham/couchproxy">dgraham/couchproxy</a>
+    </div>
+
+  </div>
+
+  
+</body>
+</html>
