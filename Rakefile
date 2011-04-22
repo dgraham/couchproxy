@@ -15,9 +15,9 @@ Documents are stored and retrieved from a particular CouchDB instance, using
 consistent hashing of the document id. Map/reduce views are processed
 concurrently on each CouchDB instance and merged together by the proxy before
 returning the results to the client."
-  s.email = "david.malcom.graham@gmail.com"
-  s.homepage = "http://github.com/dgraham/couchproxy"
+  s.homepage = "http://dgraham.github.com/couchproxy/"
   s.authors = ["David Graham"]
+  s.email = "david.malcom.graham@gmail.com"
   s.files = FileList['[A-Z]*', '{bin,lib,conf}/**/*']
   s.test_files = FileList["test/**/*"]
   s.executables = %w[couchproxy]
