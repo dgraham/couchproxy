@@ -2,7 +2,7 @@ require 'rake'
 require 'rake/clean'
 require 'rake/gempackagetask'
 require 'rake/testtask'
-require File.expand_path('../lib/couchproxy', __FILE__)
+require_relative 'lib/couchproxy'
 
 spec = Gem::Specification.new do |s| 
   s.name = "couchproxy"
@@ -22,9 +22,8 @@ returning the results to the client."
   s.test_files = FileList["test/**/*"]
   s.executables = %w[couchproxy]
   s.require_path = "lib"
-  s.has_rdoc = true
-  s.add_dependency('em-http-request', '~> 0.2')
-  s.add_dependency('json', '~> 1.4')
+  s.add_dependency('em-http-request', '~> 0.3')
+  s.add_dependency('json', '~> 1.5')
   s.add_dependency('json-stream', '~> 0.1')
   s.add_dependency('thin', '~> 1.2')
   s.add_dependency('rbtree', '~> 0.3')

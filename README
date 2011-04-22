@@ -21,10 +21,10 @@ memory.
 
 == Dependencies
 
-* em-http-request >= 0.2.15
-* json >= 1.4.6
-* json-stream >= 0.1.0
-* thin >= 1.2.7
+* em-http-request >= 0.3.0
+* json >= 1.5.1
+* json-stream >= 0.1.1
+* thin >= 1.2.11
 * rbtree >= 0.3.0
 * ruby >= 1.9.1
 
