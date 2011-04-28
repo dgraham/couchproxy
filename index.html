@@ -65,6 +65,7 @@ clients and many backend CouchDB nodes concurrently.</p>
   <li>rbtree >= 0.3.0</li>
   <li>ruby >= 1.9.1</li>
 </ul>
+
 <h2>Install</h2>
 <pre>
 $ gem install couchproxy
@@ -72,8 +73,15 @@ $ couchproxy config
 $ vi couchproxy.yml # configure couchdb nodes
 $ couchproxy start
 </pre>
+
+<h2>Ubuntu setup</h2>
+<pre>
+$ sudo apt-get install build-essential ruby1.9.1 ruby1.9.1-dev couchdb
+</pre>
+
 <h2>Authors</h2>
 <p>David Graham (david.malcom.graham@gmail.com)</p>
+
 <h2>License</h2>
 <p>
 CouchProxy is released under the
