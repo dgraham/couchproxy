@@ -28,6 +28,9 @@ memory.
 * rbtree >= 0.3.0
 * ruby >= 1.9.1
 
+== Ubuntu setup
+$ sudo apt-get install build-essential ruby1.9.1 ruby1.9.1-dev couchdb
+
 == Contact
 
 Project contact: David Graham <david.malcom.graham@gmail.com>
